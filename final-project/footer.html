@@ -1,0 +1,140 @@
+        <script src="<cms:show k_site_link />assets/js/jquery-3.0.0.js"></script>
+        <script src="<cms:show k_site_link />assets/js/bootstrap.js"></script>
+        <script src="<cms:show k_site_link />assets/js/masonry.pkgd.min.js"></script>
+        <script>
+            function readURL(input) {
+               if (input.files && input.files[0]) {
+                  var reader = new FileReader();
+
+                  reader.onload = function (e) {
+                     $('#thumbnail')
+                        .attr('src', e.target.result)   
+                     };
+                  reader.readAsDataURL(input.files[0]);
+               }
+            }
+            
+            function readURL(input) {
+               if (input.files && input.files[0]) {
+                  var reader = new FileReader();
+
+                  reader.onload = function (e) {
+                     $('#profile_pic')
+                        .attr('src', e.target.result)   
+                     };
+                  reader.readAsDataURL(input.files[0]);
+               }
+            }
+
+            $(document).ready(function() {
+               $("#dispute-form").submit(function(event) {
+                  event.preventDefault();
+                  $.ajax({
+                     type: "POST",
+                     url: $(this).attr("action"),
+                     data: $(this).serialize(),
+                     beforeSend: function(){
+                          $('#loader').show();
+                      },
+                      complete: function(){
+                          $('#loader').hide();
+                      },
+                     success: function(data) {
+                        $("#dispute-form").html($(data).children());
+
+                     }
+                  });
+               });
+            });
+
+            // Accept job
+            $("button.accept-button").click(function(e) {
+               e.preventDefault();
+               $.ajax({
+                  type: "POST",
+                  url: "<cms:show k_site_link />ajax/ajax-job-status.php",
+                  data: { 
+                     id: $(this).attr('id'),
+                     job_accepted_by: '<cms:show k_user_id />',
+                     job_status: "Posted"
+                  },
+                  success: function(data) {
+                     if(data == 1) {
+                        alert("You have successfully accepted this Job!")
+                        window.location.reload();
+                     }
+                     else {
+                        alert('error');
+                     }                   
+                  },
+                  error: function(result) {
+                     alert('error');
+                  }
+               });
+            });
+            // Accept job
+
+            // Decline Job
+            $("button.cancel-button").click(function(e) {
+               e.preventDefault();
+               $.ajax({
+                  type: "POST",
+                  url: "<cms:show k_site_link />ajax/ajax-job-status.php",
+                  data: { 
+                     id: $(this).attr('id'),
+                     job_accepted_by: '<cms:show k_user_id />',
+                     job_status: "Accepted"
+                  },
+                  success: function(data) {
+                     if(data == 1) {
+                        alert("You have successfully declined this Job! This job will now be available for everyone to accept.")
+                        window.location.reload();
+                     }
+                     else {
+                        alert('error');
+                     }                   
+                  },
+                  error: function(result) {
+                     alert('error');
+                  }
+               });
+            });
+            // Decline Job
+
+            // Complete Job
+            $("button.complete-button").click(function(e) {
+               e.preventDefault();
+               $.ajax({
+                  type: "POST",
+                  url: "<cms:show k_site_link />ajax/ajax-job-status.php",
+                  data: { 
+                     id: $(this).attr('id'),
+                     job_accepted_by: '<cms:show k_user_id />',
+                     job_status: ""
+                  },
+                  success: function(data) {
+                     if(data == 1) {
+                        alert("You have successfully completed this Job! We thank you for your efforts.")
+                        window.location.reload();
+                     }
+                     else {
+                        alert('error');
+                     }                   
+                  },
+                  error: function(result) {
+                     alert('error');
+                  }
+               });
+            });
+            // Complete Job
+         </script>
+
+         <script type="text/javascript">
+            // Conditional Fields
+            //<![CDATA[
+            <cms:conditional_js />
+            //]]>
+            // Conditional Fields
+         </script>
+    </body>
+</html>

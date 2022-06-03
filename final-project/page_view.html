@@ -1,0 +1,199 @@
+<cms:set show_uid = "<cms:gpc 'uid' method='get' />" scope="global" />
+
+<cms:pages id=show_uid show_future_entries='1' limit='1'>
+    <div class="col-12 col-md-3 mb-3">
+        <div class="card shadow">
+            <div class="profile-img-container">
+                <img class="profile-image shadow"/>
+            </div>
+            <div class="card-body">
+                <table style="margin:0px;">
+                    <tr>
+                        <td class="headline-5">
+                            <cms:show firstname /> <cms:show lastname /> 
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="body-2">
+                            <cms:show extended_user_email />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="body-2">
+                            <cms:show mobile />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="card-body">
+                <div class="headline-6">
+                    <cms:show phrase />
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="card-text">
+                    <cms:php>
+                        global $age;
+                        $birthDate = "<cms:date dob format='m/d/Y' />";
+                        $birthDate = explode("/", $birthDate);
+                        $age = (date("md", date("U", mktime(0, 0, 0, $birthDate[0], $birthDate[1], $birthDate[2]))) > date("md") ? ((date("Y") - $birthDate[2]) - 1) : (date("Y") - $birthDate[2]));
+                    </cms:php>
+                    <strong>Age (in years)</strong> : <cms:php>global $age; echo $age;</cms:php> Yrs
+                    <br>
+                    <strong>Sex:</strong><cms:if sex><cms:show sex /></cms:if>
+                    <br>
+                    <strong>Located at:</strong><cms:show city /><cms:if country>,</cms:if> <cms:show country />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 mb-3">
+        <div class="headline-1 text-center mb-3">
+            My Puzzle
+        </div>
+        <div class="card shadow mb-3">
+            <div class="card-body">
+                <div class="headline-5 mb-3">
+                    About Me
+                </div>
+                <div class="body-1">
+                    <cms:show about />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-12 mb-3">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="headline-5 mb-3">
+                            Expertise
+                        </div>
+                        <div class="body-1">
+                            <cms:show expertise />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-12 mb-3">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <div class="headline-5 mb-3">
+                            Goals
+                        </div>
+                        <div class="body-1">
+                            <cms:show goals />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</cms:pages>
+
+    <div class="col-12 col-md-3 mb-3">
+        <!--                Comment Box-->
+        <cms:if k_logged_in>
+            <cms:if global_userid ne show_uid>
+                <div class="card shadow mb-3">
+                    <div class="card-body">
+                        <h5 class="headline-5">
+                            Give me a feedback!
+                        </h5>
+                        <h6 class="card-subtitle mb-3 text-muted">
+                            Your feedback helps others! Please do leave one!
+                        </h6>
+                        <cms:set check_comment_success="<cms:get_cookie 'comment_success' />" />
+                        <cms:if check_comment_success eq '1' >
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="alert alert-success">
+                                        Feedback Posted!
+                                    </div>
+                                </div>
+                            </div>
+                            <cms:delete_cookie 'comment_success' />
+                        </cms:if>
+                        
+                        <cms:form
+                            masterpage="comments.php"
+                            mode='create'
+                            enctype='multipart/form-data'
+                            method='post'
+                            anchor='0'
+                        >
+                            <cms:if k_success >
+                                <cms:set user_wall="<cms:pages masterpage=k_user_template id=show_uid limit='1'><cms:show firstname /> <cms:show lastname /></cms:pages>" scope="global" />
+                                <cms:set commented_user_name="<cms:pages masterpage=k_user_template id=show_uid limit='1'><cms:show k_page_name /></cms:pages>" scope="global" />
+                                <cms:db_persist_form
+                                    _invalidate_cache='0'
+                                    _auto_title='0'
+                                    k_page_title = "<cms:show global_username /> commented on <cms:show user_wall />"
+                                    k_page_name = "<cms:random_name />"
+                                    user_commenting = k_user_id
+                                    user_commented = show_uid
+                                />
+                                <cms:if k_success >
+                                    <cms:set_cookie name='comment_success' value='1' />
+                                    <cms:redirect url="<cms:route_link 'page_view' masterpage='users/index.php' rt_id=show_uid />&uid=<cms:show show_uid />" />
+                                </cms:if>
+                            </cms:if>
+                            <cms:if k_error >
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="alert alert-danger">
+                                            <cms:each k_error >
+                                                <cms:show item /><br>
+                                            </cms:each>
+                                        </div>
+                                    </div>
+                                </div>
+                            </cms:if>
+                            <div class="form-floating mb-3">
+                                <cms:input name="comment" id="comment" type="bound" class="form-control" placeholder="Leave a feedback comment here" id="comment" />
+                                <label for="comment">Feedback</label>
+                            </div>
+                            <button class="btn btn-warning button" type="submit" style="margin-bottom:0;">
+                                <i class="fa fa-comment"></i> Post Feedback
+                            </button>
+                        </cms:form>
+                    </div>
+                </div>
+            </cms:if>
+        </cms:if>
+    </div>
+
+    <div class="col-12 col-md-12">
+        <h5 class="headline-5">
+            Feedback
+        </h5>
+        <h6 class="card-subtitle mb-3 text-muted">
+            How do people feel about me?
+        </h6>
+        
+        <div class="row" data-masonry='{"percentPosition": true }'>
+            <cms:pages masterpage="users/index.php" show_future_entries='1' id="<cms:show show_uid />" limit="1">
+                <cms:reverse_related_pages 'user_commented' masterpage='comments.php'>
+                <cms:no_results>
+                <div class="col-md-12">
+                    <div class="alert alert-warning shadow text-center">
+                        - No feedback yet. Be the first one to leave a comment. -
+                    </div>
+                </div>
+                </cms:no_results>
+                
+                <div class="col-md-4">
+                    <div class="card shadow mb-3">
+                        <div class="card-body">
+                            <div class="card-text mb-3">
+                                <cms:show comment />
+                            </div>
+                            <h6 class="card-subtitle text-muted text-end">
+                                - <cms:related_pages 'user_commenting'><cms:show firstname /> <cms:Show lastname /></cms:related_pages>
+                            </h6>
+                        </div>
+                    </div>
+                </div>
+            </cms:reverse_related_pages>
+            </cms:pages>
+        </div>
+    </div>
